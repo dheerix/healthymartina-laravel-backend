@@ -32,7 +32,9 @@ class PdfController extends Controller
 
     private function scaleRecipeIngredients(Receta $recipe, float|int $portion): array
     {
-        $ingredients = $recipe->getIngredientes(true);
+        // Sub-recipes are ingredients too. Passing true filters them out, which
+        // made standalone recipe exports differ from calendar recipe pages.
+        $ingredients = $recipe->getIngredientes(false);
         $basePortion = max(1, (float) ($recipe->getPorciones()['cantidad'] ?? 1));
         $ratio = max(0, (float) $portion) / $basePortion;
 

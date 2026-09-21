@@ -4,8 +4,8 @@ namespace Tests\Unit\Api\V1\Calendars;
 
 use App\Http\Controllers\Api\V1\Calendars\CalendarPdfController;
 use App\Models\Receta;
-use PHPUnit\Framework\TestCase;
 use ReflectionClass;
+use Tests\TestCase;
 
 class CalendarPdfControllerTest extends TestCase
 {
@@ -56,4 +56,3 @@ class CalendarPdfControllerTest extends TestCase
         $this->assertSame('/receta/huevo-cocido', $scaled[1]['sub-url']);
     }
 }
-
