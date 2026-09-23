@@ -1,4 +1,5 @@
 const { esc } = require("./utils");
+const { toFraction } = require('./fractions');
 
 function stripHtml(value) {
     return String(value ?? "")
@@ -65,49 +66,6 @@ function renderRecipeStyles() {
 
 function nl2br(value) {
     return esc(value || "").replace(/\n/g, "<br/>");
-}
-
-function gcd(a, b) {
-    let x = Math.abs(a);
-    let y = Math.abs(b);
-    while (y) {
-        const t = y;
-        y = x % y;
-        x = t;
-    }
-    return x || 1;
-}
-
-function toFraction(value) {
-    const n = Number(value);
-    if (!Number.isFinite(n)) return null;
-
-    const sign = n < 0 ? "-" : "";
-    const abs = Math.abs(n);
-    const whole = Math.floor(abs + 1e-9);
-    const frac = abs - whole;
-    if (frac < 1e-6) return `${sign}${whole}`;
-
-    const denominators = [2, 3, 4, 8, 16];
-    let best = null;
-    for (const d of denominators) {
-        const num = Math.round(frac * d);
-        const approx = num / d;
-        const err = Math.abs(frac - approx);
-        if (!best || err < best.err) {
-            best = { num, den: d, err };
-        }
-    }
-
-    if (!best || best.num === 0) return `${sign}${whole}`;
-    if (best.num === best.den) return `${sign}${whole + 1}`;
-
-    const div = gcd(best.num, best.den);
-    const num = best.num / div;
-    const den = best.den / div;
-
-    if (whole > 0) return `${sign}${whole} ${num}/${den}`;
-    return `${sign}${num}/${den}`;
 }
 
 function formatAmountWithFractions(raw) {
