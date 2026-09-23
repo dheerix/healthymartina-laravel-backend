@@ -59,34 +59,37 @@ class PdfController extends Controller
             return $sign . (string) $whole;
         }
 
-        $denominators = [2, 3, 4, 8, 16];
+        // Keep recipe PDFs consistent with the approved fraction vocabulary.
+        // The previous denominator search allowed 5/16, so 0.30 was exported
+        // as 5/16 even though the source quantity was 0.30.
+        $fractions = [
+            ['numerator' => 1, 'denominator' => 16, 'value' => 1 / 16],
+            ['numerator' => 1, 'denominator' => 8, 'value' => 1 / 8],
+            ['numerator' => 1, 'denominator' => 4, 'value' => 1 / 4],
+            ['numerator' => 1, 'denominator' => 3, 'value' => 1 / 3],
+            ['numerator' => 1, 'denominator' => 2, 'value' => 1 / 2],
+            ['numerator' => 2, 'denominator' => 3, 'value' => 2 / 3],
+            ['numerator' => 3, 'denominator' => 4, 'value' => 3 / 4],
+            ['numerator' => 1, 'denominator' => 1, 'value' => 1],
+        ];
+
         $best = null;
-        foreach ($denominators as $denominator) {
-            $numerator = (int) round($fraction * $denominator);
-            $approximation = $numerator / $denominator;
-            $error = abs($fraction - $approximation);
+        foreach ($fractions as $candidate) {
+            $error = abs($fraction - $candidate['value']);
             if ($best === null || $error < $best['error']) {
-                $best = [
-                    'numerator' => $numerator,
-                    'denominator' => $denominator,
-                    'error' => $error,
-                ];
+                $best = [...$candidate, 'error' => $error];
             }
         }
 
-        if ($best === null || $best['numerator'] === 0) {
+        if ($best === null) {
             return $sign . (string) $whole;
-        }
-
-        if ($best['numerator'] === $best['denominator']) {
-            return $sign . (string) ($whole + 1);
         }
 
         $numerator = $best['numerator'];
         $denominator = $best['denominator'];
-        $divisor = $this->greatestCommonDivisor($numerator, $denominator);
-        $numerator = intdiv($numerator, $divisor);
-        $denominator = intdiv($denominator, $divisor);
+        if ($denominator === 1) {
+            return $sign . (string) ($whole + 1);
+        }
 
         if ($whole > 0) {
             return sprintf('%s%d %d/%d', $sign, $whole, $numerator, $denominator);

@@ -9,6 +9,21 @@ use Tests\TestCase;
 
 class PdfControllerTest extends TestCase
 {
+    public function test_recipe_pdf_uses_approved_fractions(): void
+    {
+        $controller = new PdfController();
+        $method = (new ReflectionClass($controller))->getMethod('formatMixedFraction');
+        $method->setAccessible(true);
+
+        $this->assertSame('1/3', $method->invoke($controller, 0.30));
+        $this->assertSame('1/4', $method->invoke($controller, 0.25));
+        $this->assertSame('1/2', $method->invoke($controller, 0.50));
+        $this->assertSame('2/3', $method->invoke($controller, 0.625));
+        $this->assertSame('1 1/3', $method->invoke($controller, 1.30));
+        $this->assertSame('-1/2', $method->invoke($controller, -0.50));
+        $this->assertSame('1', $method->invoke($controller, 0.99));
+    }
+
     public function test_scale_recipe_ingredients_keeps_subrecipes_in_standalone_export(): void
     {
         $controller = new PdfController();
