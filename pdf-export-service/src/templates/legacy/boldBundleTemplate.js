@@ -153,6 +153,8 @@ function buildRecipes(model) {
         : recipe.porciones != null
           ? Number(recipe.porciones)
           : null,
+      porcionNombre: recipe.porcion_nombre || 'Porción',
+      porcionNombrePlural: recipe.porcion_nombre_plural || recipe.porcion_nombre || 'Porciones',
       minutos: recipe.tiempo_elaboracion != null ? Number(recipe.tiempo_elaboracion) : null,
       ingredients: (page.ingredients || []).map((item) => ({
         name: item.ingrediente || item.nombre || 'Ingrediente',

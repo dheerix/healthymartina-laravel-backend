@@ -165,6 +165,8 @@ function buildLegacyBoldModel(job) {
       : p.recipe?.porciones != null
         ? Number(p.recipe.porciones)
         : null,
+    porcionNombre: p.recipe?.porcion_nombre || 'Porción',
+    porcionNombrePlural: p.recipe?.porcion_nombre_plural || p.recipe?.porcion_nombre || 'Porciones',
     minutos: p.recipe?.tiempo_elaboracion != null ? Number(p.recipe.tiempo_elaboracion) : null,
     ingredients: (p.ingredients || []).map((i) => ({
       name: stripHtml(i.ingrediente || i.nombre || 'Ingrediente'),

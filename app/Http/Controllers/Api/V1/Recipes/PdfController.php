@@ -134,6 +134,7 @@ class PdfController extends Controller
     private function buildExternalPayload(Receta $recipe, float|int $portion, $nutritionalsInfo, $user): array
     {
         $scaledIngredients = $this->scaleRecipeIngredients($recipe, $portion);
+        $recipePortion = $recipe->getPorciones();
         $recipeNutrition = $this->filterRecipeNutritionForExport(
             $recipe->getInformacionNutrimental()
         );
@@ -151,7 +152,9 @@ class PdfController extends Controller
                 'id' => (int) $recipe->id,
                 'titulo' => (string) ($recipe->titulo ?? 'Receta'),
                 'imagen_principal' => (string) ($recipe->imagen_principal ?? ''),
-                'porciones' => (int) ($recipe->porciones ?? ($recipe->getPorciones()['cantidad'] ?? 1)),
+                'porciones' => (float) ($recipe->porciones ?? ($recipePortion['cantidad'] ?? 1)),
+                'porcion_nombre' => (string) ($recipePortion['nombre'] ?? 'Porción'),
+                'porcion_nombre_plural' => (string) ($recipePortion['nombre_plural'] ?? 'Porciones'),
                 'tiempo_elaboracion' => (int) ($recipe->tiempo_elaboracion ?? ($recipe->tiempo ?? 0)),
                 'instrucciones' => array_values($recipe->getInstrucciones() ?? []),
                 'tips' => implode(PHP_EOL, array_values($recipe->getTipsPlain() ?? [])),

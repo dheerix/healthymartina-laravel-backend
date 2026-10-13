@@ -203,7 +203,9 @@ function renderRecipes(model, options = {}) {
 
             const metaPorciones =
                 r.porciones != null
-                    ? `${esc(r.porciones)} ${Number(r.porciones) === 1 ? 'porción' : 'porciones'}`
+                    ? `${esc(r.porciones)} ${esc(Number(r.porciones) === 1
+                        ? (r.porcionNombre || 'Porción')
+                        : (r.porcionNombrePlural || r.porcionNombre || 'Porciones'))}`
                     : "";
             const metaMinutos =
                 r.minutos != null && r.minutos > 0

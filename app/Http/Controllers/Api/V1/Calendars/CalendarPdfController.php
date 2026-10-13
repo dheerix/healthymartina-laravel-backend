@@ -645,6 +645,7 @@ class CalendarPdfController extends Controller
                 ?? $recipeMeta[$recipeId]['portion']
                 ?? $recipe->getPorciones()['cantidad']
                 ?? 1;
+            $recipePortion = $recipe->getPorciones();
             $ingredients = $this->scaleRecipeIngredients($recipe, $portion);
             $nutrition = $this->filterRecipeNutritionForExport(
                 $recipe->getInformacionNutrimental()
@@ -665,7 +666,9 @@ class CalendarPdfController extends Controller
                     'id' => (int) $recipe->id,
                     'titulo' => (string) ($recipe->titulo ?? ''),
                     'imagen_principal' => (string) ($recipe->imagen_principal ?? ''),
-                    'porciones' => (int) ($recipe->porciones ?? ($recipe->getPorciones()['cantidad'] ?? 1)),
+                    'porciones' => (float) ($recipe->porciones ?? ($recipePortion['cantidad'] ?? 1)),
+                    'porcion_nombre' => (string) ($recipePortion['nombre'] ?? 'Porción'),
+                    'porcion_nombre_plural' => (string) ($recipePortion['nombre_plural'] ?? 'Porciones'),
                     'tiempo_elaboracion' => (int) ($recipe->tiempo_elaboracion ?? ($recipe->tiempo ?? 0)),
                     'instrucciones' => array_values($recipe->getInstrucciones() ?? []),
                     'tips' => implode(PHP_EOL, array_values($recipe->getTipsPlain() ?? [])),

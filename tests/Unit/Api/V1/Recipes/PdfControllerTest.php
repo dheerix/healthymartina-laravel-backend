@@ -69,4 +69,58 @@ class PdfControllerTest extends TestCase
         $this->assertSame('subrecipe', $scaled[1]['type']);
         $this->assertSame('/receta/huevo-cocido', $scaled[1]['sub-url']);
     }
+
+    public function test_external_payload_preserves_recipe_yield_measurement(): void
+    {
+        $controller = new PdfController();
+        $method = (new ReflectionClass($controller))->getMethod('buildExternalPayload');
+        $method->setAccessible(true);
+
+        $recipe = new class extends Receta {
+            public function getIngredientes($solo_ingredientes = false)
+            {
+                return [];
+            }
+
+            public function getPorciones($active = true)
+            {
+                return [
+                    'cantidad' => 1,
+                    'nombre' => 'Taza',
+                    'nombre_plural' => 'Tazas',
+                ];
+            }
+
+            public function getInformacionNutrimental($porcentajeOverride = 100, $porcionesOverride = 0, $numeroDivision = 0, $porcionesDivision = 0)
+            {
+                return ['info' => []];
+            }
+
+            public function getInstrucciones()
+            {
+                return [];
+            }
+
+            public function getTipsPlain()
+            {
+                return [];
+            }
+        };
+        $recipe->id = 42;
+        $recipe->titulo = 'Caldo';
+
+        $user = (object) [
+            'bname' => 'Healthy Martina',
+            'bemail' => 'test@example.com',
+            'email' => 'test@example.com',
+            'bimage' => '',
+            'color' => '#36544e',
+        ];
+
+        $payload = $method->invoke($controller, $recipe, 1, [], $user);
+        $exportedRecipe = $payload['recipePages'][0]['recipe'];
+
+        $this->assertSame('Taza', $exportedRecipe['porcion_nombre']);
+        $this->assertSame('Tazas', $exportedRecipe['porcion_nombre_plural']);
+    }
 }
