@@ -300,13 +300,10 @@ function getRelatedIngrediente($calendario_id, $categoria_id, $use = "list")
                     } else {
                         foreach ($ingredients_data as $key => $value) {
                             if ($value['ingrediente_id'] == $ingredient['ingrediente_id']) {
-                                if ($value['medida'] == 'al gusto') {
-                                    $value['medida'] = $ingredient['medida'];
-                                    $value['medida_english'] = $ingredient['medida_english'];
-                                    $value['tipo_medida_id'] = $ingredient['tipo_medida_id'];
-                                    $value['medida_plural'] = $ingredient['medida_plural'];
-                                    $value['cantidad'] = $ingredient['cantidad'];
-                                }
+                                // Preserve every occurrence exactly as scheduled. Replacing an
+                                // initial "al gusto" occurrence with the next numeric occurrence
+                                // both lost the taste entry and caused the numeric amount to be
+                                // counted twice by shopping-list aggregation.
                                 $value['repeat'][] = $ingredient;
                                 // $value['cantidad']= $ingredient['cantidad'] + $value['cantidad'];
                                 //$value['get_servings'] = $ingredient['get_servings'] + $value['get_servings'];

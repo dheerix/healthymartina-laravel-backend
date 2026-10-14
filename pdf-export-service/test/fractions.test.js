@@ -2,6 +2,7 @@ const assert = require('node:assert/strict');
 const { toFraction } = require('../src/templates/legacy/components/fractions');
 const { buildLegacyBoldModel } = require('../src/templates/legacy/model');
 const { renderRecipes } = require('../src/templates/legacy/components/recipes');
+const { formatAmountWithFractions } = require('../src/templates/legacy/components/lista');
 
 assert.equal(toFraction(0.30), '1/3');
 assert.equal(toFraction(0.25), '1/4');
@@ -11,6 +12,7 @@ assert.equal(toFraction(1.30), '1 1/3');
 assert.equal(toFraction(-0.50), '-1/2');
 assert.equal(toFraction(-1.30), '-1 1/3');
 assert.equal(toFraction(0.99), '1');
+assert.equal(formatAmountWithFractions('2/3 pza + 75 g'), '2/3 pza + 75 g');
 
 const model = buildLegacyBoldModel({
     payload: {

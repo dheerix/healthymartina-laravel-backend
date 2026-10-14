@@ -6,6 +6,7 @@ const MAX_ROWS_PER_COLUMN = 16;
 function formatAmountWithFractions(raw) {
   const text = String(raw || '').trim();
   if (!text) return '';
+  if (/^-?\d+(?:\s+\d+)?\/\d+/.test(text)) return text;
 
   const match = text.match(/^(-?\d+(?:[.,]\d+)?)\s*(.*)$/);
   if (!match) return text;
@@ -118,4 +119,4 @@ function renderLista(model) {
   }).join('');
 }
 
-module.exports = { renderLista, renderListaStyles };
+module.exports = { renderLista, renderListaStyles, formatAmountWithFractions };

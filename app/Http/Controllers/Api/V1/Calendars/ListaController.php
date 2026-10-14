@@ -20,7 +20,7 @@ class ListaController extends Controller
     private function listaCacheKey(int $calendarId, string $suffix = 'all', ?string $calendarUpdatedAt = null): string
     {
         return sprintf(
-            'lista:v1:user:%d:calendar:%d:updated:%s:%s',
+            'lista:v2:user:%d:calendar:%d:updated:%s:%s',
             (int) Auth::id(),
             $calendarId,
             $calendarUpdatedAt ?: 'na',

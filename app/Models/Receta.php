@@ -236,43 +236,48 @@ class Receta extends Model
                     );
                 }
             } else if ($rir->subreceta) {
-                if ($rir->rirm[0]->medida->tipo_medida_id == 1) {
-                    if ($rir->subreceta->getPorciones()['nombre_english'] == 'cup') {
-                        if ($rir->rirm[0]->medida->nombre_english == 'tablespoon') {
-                            $rir->rirm[0]->cantidad = $rir->rirm[0]->cantidad / 16;
-                        } elseif ($rir->rirm[0]->medida->nombre_english == 'teaspoon') {
-                            $rir->rirm[0]->cantidad = $rir->rirm[0]->cantidad / 48;
-                        }
-                        $rir->rirm[0]->medida->abreviatura = 'tz';
-                        $rir->rirm[0]->medida->abreviatura_plural = 'tzs';
-                        $rir->rirm[0]->medida->medida_english = 'cup';
-                    } elseif ($rir->subreceta->getPorciones()['nombre_english'] == 'tablespoon') {
-                        if ($rir->rirm[0]->medida->nombre_english == 'teaspoon') {
-                            $rir->rirm[0]->cantidad = $rir->rirm[0]->cantidad / 3;
-                        }
-                        $rir->rirm[0]->medida->abreviatura = 'cda';
-                        $rir->rirm[0]->medida->abreviatura_plural = 'cdas';
-                        $rir->rirm[0]->medida->medida_english = 'tablespoon';
-                    }
+                $subCantidad = $rir->rirm[0] && is_numeric($rir->rirm[0]->cantidad) ? (float) $rir->rirm[0]->cantidad : 0.0;
+                $subMedida = $rir->rirm[0] && $rir->rirm[0]->medida ? $rir->rirm[0]->medida->abreviatura : '';
+                $subMedidaPlural = $rir->rirm[0] && $rir->rirm[0]->medida ? $rir->rirm[0]->medida->abreviatura_plural : '';
+                $subMedidaEnglish = $rir->rirm[0] && $rir->rirm[0]->medida ? ($rir->rirm[0]->medida->nombre_english ?: 'NA') : '';
+                $subTipoMedidaId = $rir->rirm[0] && $rir->rirm[0]->medida ? $rir->rirm[0]->medida->tipo_medida_id : '';
 
+                if ($subTipoMedidaId == 1 && $rir->subreceta) {
+                    $subrecetaPorcionNombre = $rir->subreceta->getPorciones()['nombre_english'] ?? '';
+                    if ($subrecetaPorcionNombre == 'cup') {
+                        if ($subMedidaEnglish == 'tablespoon') {
+                            $subCantidad = $subCantidad / 16;
+                        } elseif ($subMedidaEnglish == 'teaspoon') {
+                            $subCantidad = $subCantidad / 48;
+                        }
+                        $subMedida = 'tz';
+                        $subMedidaPlural = 'tzs';
+                        $subMedidaEnglish = 'cup';
+                    } elseif ($subrecetaPorcionNombre == 'tablespoon') {
+                        if ($subMedidaEnglish == 'teaspoon') {
+                            $subCantidad = $subCantidad / 3;
+                        }
+                        $subMedida = 'cda';
+                        $subMedidaPlural = 'cdas';
+                        $subMedidaEnglish = 'tablespoon';
+                    }
                 }
                 $subreceta = [
                     'ingred_uid' => 'subrecipe' . $rir->subreceta->id,
                     'subrecipe_id' => $rir->subreceta->id,
                     'subrecipe_title' => $rir->subreceta->titulo,
-                    'medida' => $rir->rirm[0] ? $rir->rirm[0]->medida->abreviatura : '',
-                    'medida_plural' => $rir->rirm[0] ? $rir->rirm[0]->medida->abreviatura_plural : '',
-                    'medida_english' => $rir->rirm[0] ? ($rir->rirm[0]->medida->nombre_english ? $rir->rirm[0]->medida->nombre_english : 'NA') : '',
-                    'tipo_medida_id' => $rir->rirm[0] ? $rir->rirm[0]->medida->tipo_medida_id : '',
-                    'cantidad' => $rir->rirm[0] ? $rir->rirm[0]->cantidad : '',
+                    'medida' => $subMedida,
+                    'medida_plural' => $subMedidaPlural,
+                    'medida_english' => $subMedidaEnglish,
+                    'tipo_medida_id' => $subTipoMedidaId,
+                    'cantidad' => $subCantidad,
                     'porcion' => $rir->subreceta->getPorciones()['cantidad'],
                     'nombre_english' => $rir->subreceta->getPorciones()['nombre_english'],
-
                 ];
                 $subreceta_ingres = $rir->subreceta->getCategoriaIngredientes($categoria_id, $meal, $day, $schedule, $get_servings, $porcion, $solo_ingredientes = false, $subreceta);
                 $sub_receta = Receta::where('id', $rir->receta_id)->firstOrFail();
                 $recipe_porcion = $sub_receta->getPorciones()['cantidad'];
-                $get_recipe_cantidad = round($rir->rirm[0]->cantidad * $get_servings / $recipe_porcion, 2);
+                $get_recipe_cantidad = round($subCantidad * $get_servings / $recipe_porcion, 2);
                 $numpart = explode(".", $get_recipe_cantidad);
                 //sub recipe serving
                 if (isset($numpart[1])) {

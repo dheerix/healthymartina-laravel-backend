@@ -10,6 +10,7 @@ use App\Models\Categoria;
 use App\Models\ListaIngredientes;
 use App\Models\Receta;
 use App\Support\NutritionPreferenceSupport;
+use App\Support\ShoppingListAggregator;
 use App\Services\Calendar\ExternalPdfExportService;
 use App\Services\Mail\ExternalMailService;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
@@ -827,6 +828,7 @@ class CalendarPdfController extends Controller
                     'nombre'=> $category->nombre,
                     'name'  => $category->nombre,
                     'items' => collect($items)->map(function ($item) use ($category) {
+                        $item = ShoppingListAggregator::aggregateIngredient($item);
                         return [
                             'ingrediente_id' => $item['ingrediente_id'] ?? null,
                             'categoria_id'   => $item['categoria_id'] ?? $category->id,
