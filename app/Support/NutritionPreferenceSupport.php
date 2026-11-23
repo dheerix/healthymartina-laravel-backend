@@ -6,20 +6,28 @@ class NutritionPreferenceSupport
 {
     public const RECIPE_PREFERENCES_CUSTOMIZED_KEY = '__recipe_preferences_customized';
 
-    public const RECIPE_DISPLAY_IDS = [94, 99, 96, 97, 213, 180, 102, 103, 106, 107];
-
     public const RECIPE_DEFAULT_IDS = [94, 99, 96, 97, 213];
+
+    public static function getRecipeDisplayIds(): array
+    {
+        return array_values(array_filter(array_map(function ($item) {
+            $itemArray = is_array($item) ? $item : (array) $item;
+
+            return isset($itemArray['id']) ? (int) $itemArray['id'] : null;
+        }, config('constants.nutritients', []))));
+    }
 
     public static function getRecipeNutritionOptions(?array $storedInfo = null): array
     {
         $normalized = self::normalizeNutritionInfo($storedInfo);
-        $options = array_filter($normalized, function (array $item) {
-            return in_array((int) ($item['id'] ?? 0), self::RECIPE_DISPLAY_IDS, true);
+        $displayIds = self::getRecipeDisplayIds();
+        $options = array_filter($normalized, function (array $item) use ($displayIds) {
+            return in_array((int) ($item['id'] ?? 0), $displayIds, true);
         });
 
         usort($options, function (array $left, array $right) {
-            return array_search((int) ($left['id'] ?? 0), self::RECIPE_DISPLAY_IDS, true)
-                <=> array_search((int) ($right['id'] ?? 0), self::RECIPE_DISPLAY_IDS, true);
+            return ((int) ($left['orden'] ?? PHP_INT_MAX))
+                <=> ((int) ($right['orden'] ?? PHP_INT_MAX));
         });
 
         return array_values($options);
@@ -30,6 +38,7 @@ class NutritionPreferenceSupport
         $base = config('constants.nutritients', []);
         $normalized = [];
         $hasCustomizedRecipePrefs = self::hasCustomizedRecipePreferences($storedInfo);
+        $displayIds = self::getRecipeDisplayIds();
 
         foreach ($base as $fdcId => $item) {
             $normalized[(string) $fdcId] = is_array($item) ? $item : (array) $item;
@@ -49,7 +58,7 @@ class NutritionPreferenceSupport
         foreach ($normalized as &$item) {
             $id = (int) ($item['id'] ?? 0);
             if (
-                in_array($id, self::RECIPE_DISPLAY_IDS, true) &&
+                in_array($id, $displayIds, true) &&
                 !$hasCustomizedRecipePrefs
             ) {
                 $item['mostrar'] = in_array($id, self::RECIPE_DEFAULT_IDS, true) ? 1 : 0;

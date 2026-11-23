@@ -23,6 +23,8 @@ use Illuminate\Support\Facades\Log;
 
 class CalendarPdfController extends Controller
 {
+    private ?array $selectedExportNutritionIds = null;
+
     private function prepareExportRuntimeLimits(): void
     {
         // Export is CPU/memory heavy (Dompdf + merge). Raise limits only for this request path.
@@ -635,7 +637,7 @@ class CalendarPdfController extends Controller
         }
 
         $recipePages = [];
-        $selectedNutritionIds = $this->mandatoryExportNutritionIds();
+        $selectedNutritionIds = $this->getSelectedExportNutritionIds();
         foreach ($selected as $recipeId) {
             $recipe = $recipes[$recipeId] ?? null;
             if (!$recipe) {
@@ -704,7 +706,7 @@ class CalendarPdfController extends Controller
                         continue;
                     }
                     $nutrientId = isset($entry[0]) ? (int) $entry[0] : null;
-                    if (!in_array($nutrientId, $this->mandatoryExportNutritionIds(), true)) {
+                    if (!in_array($nutrientId, $selectedNutritionIds, true)) {
                         continue;
                     }
                     $rows[] = [
@@ -1601,9 +1603,15 @@ SVG;
         return $nutrition;
     }
 
-    private function mandatoryExportNutritionIds(): array
+    private function getSelectedExportNutritionIds(): array
     {
-        return NutritionPreferenceSupport::RECIPE_DEFAULT_IDS;
+        if ($this->selectedExportNutritionIds === null) {
+            $this->selectedExportNutritionIds = NutritionPreferenceSupport::getSelectedIdsFromInfo(
+                $this->getUserNutritionalsInfo()
+            );
+        }
+
+        return $this->selectedExportNutritionIds;
     }
 
     private function filterRecipeNutritionForExport(array $nutrition): array
@@ -1612,7 +1620,7 @@ SVG;
             return $nutrition;
         }
 
-        $selectedNutritionIds = $this->mandatoryExportNutritionIds();
+        $selectedNutritionIds = $this->getSelectedExportNutritionIds();
 
         $nutrition['info'] = array_values(array_filter($nutrition['info'], function ($nutrient) use ($selectedNutritionIds) {
             return in_array((int) ($nutrient['id'] ?? 0), $selectedNutritionIds, true);

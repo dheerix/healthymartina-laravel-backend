@@ -111,18 +111,13 @@ class PdfController extends Controller
         return $x ?: 1;
     }
 
-    private function mandatoryExportNutritionIds(): array
-    {
-        return NutritionPreferenceSupport::RECIPE_DEFAULT_IDS;
-    }
-
-    private function filterRecipeNutritionForExport(array $nutrition): array
+    private function filterRecipeNutritionForExport(array $nutrition, array $nutritionalsInfo): array
     {
         if (!isset($nutrition['info']) || !is_array($nutrition['info'])) {
             return $nutrition;
         }
 
-        $selectedNutritionIds = $this->mandatoryExportNutritionIds();
+        $selectedNutritionIds = NutritionPreferenceSupport::getSelectedIdsFromInfo($nutritionalsInfo);
 
         $nutrition['info'] = array_values(array_filter($nutrition['info'], function ($nutrient) use ($selectedNutritionIds) {
             return in_array((int) ($nutrient['id'] ?? 0), $selectedNutritionIds, true);
@@ -136,7 +131,8 @@ class PdfController extends Controller
         $scaledIngredients = $this->scaleRecipeIngredients($recipe, $portion);
         $recipePortion = $recipe->getPorciones();
         $recipeNutrition = $this->filterRecipeNutritionForExport(
-            $recipe->getInformacionNutrimental()
+            $recipe->getInformacionNutrimental(),
+            $nutritionalsInfo
         );
         $nutritionRows = [];
         foreach (($recipeNutrition['info'] ?? []) as $nutrient) {

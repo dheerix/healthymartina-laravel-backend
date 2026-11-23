@@ -1,6 +1,6 @@
 const { esc } = require('./utils');
 
-const MACRO_IDS = { carbs: 96, protein: 97, fat: 99 };
+const MACRO_IDS = { carbs: 99, protein: 96, fat: 97 };
 const LEFT_ORDER = [
   'calorias',
   'carbohidratos',
@@ -87,6 +87,16 @@ function dayCard(day) {
   const carbs = byId.get(MACRO_IDS.carbs);
   const protein = byId.get(MACRO_IDS.protein);
   const fat = byId.get(MACRO_IDS.fat);
+  const macroCells = [
+    { row: carbs, label: 'Carbohidratos', className: 'macro-carb' },
+    { row: protein, label: 'Proteína', className: 'macro-protein' },
+    { row: fat, label: 'Grasa total', className: 'macro-fat' },
+  ].filter(({ row }) => row);
+  const macroLine = macroCells.length
+    ? `<div class="nutrition-macros-line">${macroCells.map(({ row, label, className }) => (
+      `<span class="macro ${className}">${label} ${esc(row.percentage != null ? `${Number(row.percentage).toFixed(2)}%` : '')}</span>`
+    )).join('')}</div>`
+    : '';
 
   const { picked: leftPicked, remaining: afterLeft } = pickOrderedRows(rows, LEFT_ORDER);
   const { picked: rightPicked, remaining: afterRight } = pickOrderedRows(afterLeft, RIGHT_ORDER);
@@ -111,11 +121,7 @@ function dayCard(day) {
 
   return `<article class="nutrition-day-card">
     <h3 class="nutrition-day-title">${esc(day.label || '')}</h3>
-    <div class="nutrition-macros-line">
-      <span class="macro macro-carb">Carbohidratos ${esc(carbs?.percentage != null ? `${Number(carbs.percentage).toFixed(2)}%` : '')}</span>
-      <span class="macro macro-protein">Proteína ${esc(protein?.percentage != null ? `${Number(protein.percentage).toFixed(2)}%` : '')}</span>
-      <span class="macro macro-fat">Grasa total ${esc(fat?.percentage != null ? `${Number(fat.percentage).toFixed(2)}%` : '')}</span>
-    </div>
+    ${macroLine}
     <div class="nutrition-rows">${nutrientRows}</div>
   </article>`;
 }

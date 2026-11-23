@@ -79,10 +79,11 @@ class PreferencesController extends Controller
                 ? json_decode($nutritionalPreferences->nutritional_info, true)
                 : null;
             $nutritionInfo = NutritionPreferenceSupport::normalizeNutritionInfo($storedNutritionInfo);
+            $displayIds = NutritionPreferenceSupport::getRecipeDisplayIds();
 
             foreach ($nutritionInfo as &$item) {
                 $id = (int) ($item['id'] ?? 0);
-                if (in_array($id, NutritionPreferenceSupport::RECIPE_DISPLAY_IDS, true)) {
+                if (in_array($id, $displayIds, true)) {
                     $item['mostrar'] = in_array($id, $selectedNutritionIds, true) ? 1 : 0;
                 }
             }

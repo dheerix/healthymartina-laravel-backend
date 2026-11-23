@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "test": "node test/fractions.test.js"
+    "test": "node test/fractions.test.js && node test/nutrition.test.js"
   },
   "dependencies": {
     "dotenv": "^16.4.5",
